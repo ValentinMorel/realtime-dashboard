@@ -21,36 +21,30 @@ function Dashboard() {
   const [latency, setLatency] = useState(0)
   const [errors, setErrors] = useState(0)
 
-
-
-  var ACCESS_KEY = 'AKIA5FTZECQ42M66QDPE'
-  var ACCESS_SECRET = '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'
-
-
   useEffect(() => {
-    const interval = setInterval(() => {
+      const interval = setInterval(() => {
       const dynamodb = new AWS.DynamoDB({
-        region: 'eu-central-1',
-        credentials: {
-          accessKeyId: ACCESS_KEY,
-          secretAccessKey: ACCESS_SECRET,
-        },
+          region: process.env.REACT_APP_region,
+          credentials: {
+            accessKeyId: process.env.REACT_APP_aws_access_key_id,
+            secretAccessKey: process.env.REACT_APP_aws_secret_access_key,
+          },
       })
+
       var paramPut = {
         Key: {
           "id": {
-            N: "1"
+            S: "1"
           }
         },
         TableName: "summary"
       }
       let ret = dynamodb.getItem(paramPut).promise()
           .then((data, err) => {
-            setCount(data.Item["total"].N);
-            setPlayingFFA(data.Item["playing_ffa"].N)
-            setPlaying1v1(data.Item["playing_1v1"].N)
-            setLatency(data.Item["latency"].N)
-
+            setCount(data.Item["total"].N !== undefined ? data.Item["total"].N : 0);
+            setPlayingFFA(data.Item["playing_ffa"].N !== undefined ? data.Item["playing_ffa"].N : 0)
+            setPlaying1v1(data.Item["playing_1v1"].N !== undefined ? data.Item["playing_1v1"].N: 0)
+            setLatency(data.Item["latency"].N !== undefined ? data.Item["latency"].N : 0)
           })
           .catch(err => console.log(err))
     }, 7500) // would be 10s in real use case : sufficient
